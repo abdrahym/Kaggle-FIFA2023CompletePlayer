@@ -1,0 +1,13 @@
+**/__pycache__
+**/__*__
+__*__*
+.ipynb_checkpoints
+FIFA23CompletePlayerDatasetPath
+scripts
+sql
+.pylintrc
+.idea
+.flake8
+.vscode
+.paths
+debug.log
