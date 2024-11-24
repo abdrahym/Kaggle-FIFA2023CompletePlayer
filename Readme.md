@@ -7,6 +7,11 @@
 %load_ext autoreload
 %autoreload 2
 
+%load_ext sql
+```
+
+
+```python
 import os
 import sys
 import time
@@ -14,26 +19,25 @@ import warnings
 
 import pandas as pd
 
-%load_ext sql
-time.sleep(1)
-
-setPath = os.path.join(os.getenv('LinkPaths'), 'GSCSetups')
+setPath = os.path.join(os.getenv('LinkPaths'), 'arrowSEnvs')
 if setPath not in sys.path: sys.path.append(setPath)
 
 from setupEnv import setupEnv
 setupEnv.setPaths()
-GscienLibsPy = setupEnv.pathAt.get('GscienLibsPy')
-FIFA23CompletePlayerDatasetPath = setupEnv.pathAt.get('FIFA23CompletePlayerDatasetPath')
+arrowDb = setupEnv.pathAt.get('path1')
+dataset = setupEnv.pathAt.get('dataset')
+database = setupEnv.pathAt.get('database')
 
-from GSCConnDb import SetPathFiles
-from GSCConnDb import ConnDbase
+import arrowDb
+from arrowDb.sets import SetPathFiles # type: ignore
 
-dataSourceLists = SetPathFiles.list_files_path(FIFA23CompletePlayerDatasetPath,'csv', getr=True)
-FIFA23ConnDbDuckdb = ConnDbase('duckdb',conn_typesub='duckdb',
+datasetLists = SetPathFiles.list_files_path(dataset,'csv', getr=True)
+FIFA23ConnDb = arrowDb.JunctDbase('duckdb',conn_typesub='duckdb',
                         file_dbase='fifa23completeplayer.duckdb',
-                        folder_path=FIFA23CompletePlayerDatasetPath)
-os.environ['FIFA23ConnDbDuckdbStr'] = FIFA23ConnDbDuckdb.conn('conn string')
-%sql $FIFA23ConnDbDuckdbStr
+                        folder_path=database)
+databaseLists = SetPathFiles.list_files_path(database,'duckdb', getp=False)
+os.environ['FIFA23ddbStr'] = FIFA23ConnDb.conn('conn string')
+# %sql $FIFA23ddbStr
 ```
 
 
@@ -47,18 +51,15 @@ os.environ['FIFA23ConnDbDuckdbStr'] = FIFA23ConnDbDuckdb.conn('conn string')
 <hr style="width: 60%; margin-left: 0; border: none; border-bottom: 1px solid black; margin-top: 0;">
 
 
-<ul>
-  <li>female_coaches.csv - 0.01MB (5.23e+00 KB)</li>
-  <li>female_players.csv - 89.85MB (9.20e+04 KB)</li>
-  <li>female_players_legacy.csv - 1.61MB (1.65e+03 KB)</li>
-  <li>female_teams.csv - 2.11MB (2.16e+03 KB)</li>
-  <li>male_coaches.csv - 0.13MB (1.30e+02 KB)</li>
-  <li>male_players.csv - 5.25 GB (5.50e+06 KB)</li>
-  <li>male_players_legacy.csv - 86.72MB (8.88e+04 KB)</li>
-  <li>male_players_output.csv - 5.22 GB (5.48e+06 KB)</li>
-  <li>male_teams.csv - 107.52MB (1.10e+05 KB)</li>
-</ul>
-<br>
+    female_coaches.csv 0.01MB (5.23e+00 KB)
+    female_players.csv 89.85MB (9.20e+04 KB)
+    female_players_legacy.csv 1.61MB (1.65e+03 KB)
+    female_teams.csv 2.11MB (2.16e+03 KB)
+    male_coaches.csv 0.13MB (1.30e+02 KB)
+    male_players.csv 5.25 GB (5.50e+06 KB)
+    male_players_legacy.csv 86.72MB (8.88e+04 KB)
+    male_players_output.csv 5.22 GB (5.48e+06 KB)
+    male_teams.csv 107.52MB (1.10e+05 KB)
     
 
 
@@ -74,13 +75,8 @@ os.environ['FIFA23ConnDbDuckdbStr'] = FIFA23ConnDbDuckdb.conn('conn string')
 
 
 
-<span style="None">Connecting to &#x27;duckdb:///C:\\\\GServer\\\\LinkPaths\\\\Datas\\\\WorkBoxData\\\\FIFA23CompletePlayerDatasetPath\\fifa23completeplayer.duckdb&#x27;</span>
+<hr style="width: 60%; margin-left: 0; border: none; border-bottom: 1px solid black; margin-top: 0;">
 
-
-
-```python
-%config SqlMagic.displaylimit = 5
-```
 
 ## Import data to table DuckDB database
 
@@ -90,7 +86,7 @@ os.environ['FIFA23ConnDbDuckdbStr'] = FIFA23ConnDbDuckdb.conn('conn string')
 
 
 ```python
-SetPathFiles.list_files_path(FIFA23CompletePlayerDatasetPath,'duckdb')
+SetPathFiles.list_files_path(database,'duckdb')
 ```
 
 
@@ -104,9 +100,7 @@ SetPathFiles.list_files_path(FIFA23CompletePlayerDatasetPath,'duckdb')
 <hr style="width: 60%; margin-left: 0; border: none; border-bottom: 1px solid black; margin-top: 0;">
 
 
-<ul>
-  <li>fifa23completeplayer.duckdb - 0.01MB (1.20e+01 KB)</li>
-</ul>
+    [92m[1mfifa23completeplayer.duckdb 0.01MB (1.20e+01 KB)
     
 
 
@@ -117,9 +111,9 @@ SetPathFiles.list_files_path(FIFA23CompletePlayerDatasetPath,'duckdb')
 
 
 ```python
-FIFA23ConnDbDuckdb.query(
+FIFA23ConnDb.query(
     'import file to db',
-    path=FIFA23CompletePlayerDatasetPath,
+    path=dataset,
     file='male_players.csv',
     file_type='csv')
 ```
@@ -136,10 +130,9 @@ FIFA23ConnDbDuckdb.query(
 
 
     File 'male_players.csv' has been successfully imported into table 'male_players'
-    Time taken: 88.85 seconds
-    Peak memory: 7.49 GB
-    Average memory: 1.06 GB
-    Memory usage: 1.75 GB
+    Time taken: 100.78 seconds
+    Peak memory: 7.27 GB
+    Average memory: 204.66 MB
     Total rows and columns: (10003590, 110)
     
 
@@ -149,7 +142,7 @@ FIFA23ConnDbDuckdb.query(
 
 
 ```python
-SetPathFiles.list_files_path(FIFA23CompletePlayerDatasetPath,'duckdb')
+SetPathFiles.list_files_path(database,'duckdb')
 ```
 
 
@@ -163,9 +156,7 @@ SetPathFiles.list_files_path(FIFA23CompletePlayerDatasetPath,'duckdb')
 <hr style="width: 60%; margin-left: 0; border: none; border-bottom: 1px solid black; margin-top: 0;">
 
 
-<ul>
-  <li>fifa23completeplayer.duckdb - 1.52 GB (1.60e+06 KB)</li>
-</ul>
+    [92m[1mfifa23completeplayer.duckdb 1.53 GB (1.60e+06 KB)
     
 
 
@@ -174,7 +165,7 @@ SetPathFiles.list_files_path(FIFA23CompletePlayerDatasetPath,'duckdb')
 
 
 ```python
-FIFA23ConnDbDuckdb.query("object list", type='table')
+FIFA23ConnDb.query("object list")
 ```
 
 
@@ -189,11 +180,23 @@ FIFA23ConnDbDuckdb.query("object list", type='table')
 <hr style="width: 60%; margin-left: 0; border: none; border-bottom: 1px solid black; margin-top: 0;">
 
 
+
+<hr style="width: 60%; margin-left: 0; border: none; border-top: 1px solid black; margin-bottom: 0;">
+
+
+    List for 'view' in 'fifa23completeplayer.duckdb' database:
+    - [Null] No view object in list
+    
+
+
+<hr style="width: 60%; margin-left: 0; border: none; border-bottom: 1px solid black; margin-top: 0;">
+
+
 #### 'male_players' table description
 
 
 ```python
-FIFA23ConnDbDuckdb.query('table description',
+FIFA23ConnDb.query('table description',
                         table='male_players',
                         columns='column_name,\
                         ordinal_position,\
@@ -214,19 +217,6 @@ FIFA23ConnDbDuckdb.query('table description',
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -333,7 +323,7 @@ FIFA23ConnDbDuckdb.query('table description',
 
 
 ```python
-FIFA23ConnDbDuckdb.query('show table',view='male_players',nrows=5)
+FIFA23ConnDb.query('show table',view='male_players',nrows=5)
 ```
 
 
@@ -342,19 +332,6 @@ FIFA23ConnDbDuckdb.query('show table',view='male_players',nrows=5)
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -557,7 +534,7 @@ for col in columns:
 qstrings += "\nFROM male_players" 
 qstrings += "\nWHERE league_name IN ('Premier League', 'La Liga', 'Ligue 1', 'Serie A')"
 
-FIFA23ConnDbDuckdb.query(
+FIFA23ConnDb.query(
             'create view query',
             view='qv_mplayers_overall_years', 
             qstrings=qstrings, 
@@ -571,7 +548,7 @@ FIFA23ConnDbDuckdb.query(
 
 
 ```python
-FIFA23ConnDbDuckdb.query("object list", type='view')
+FIFA23ConnDb.query("object list", type='view')
 ```
 
 
@@ -590,7 +567,7 @@ FIFA23ConnDbDuckdb.query("object list", type='view')
 
 
 ```python
-df_mplayers_overall_years = FIFA23ConnDbDuckdb.query(
+df_mplayers_overall_years = FIFA23ConnDb.query(
                             "get df view",
                             view='qv_mplayers_overall_years',
                             nrows='all')
@@ -659,33 +636,42 @@ df_mplayers_overall_years.info()
 
 ```python
 import pandas as pd
-import plotly.express as px
+import seaborn as sns
+import matplotlib.pyplot as plt
 
+# Data Preparation
 df = df_mplayers_overall_years.copy()
 df = df.groupby('short_name')['overall'].mean().reset_index()
 df = df.sort_values(by='overall', ascending=False).head(5)
 
-fig = px.bar(
-    data_frame=df,
+# Plotting with Seaborn
+plt.figure(figsize=(10, 6))
+
+# Bar plot
+sns.barplot(
+    data=df,
     x='overall',
     y='short_name',
-    orientation='h',
-    color='overall',
-    color_continuous_scale='Blues',
-    title='Top Players by Average Overall Rating',
-    labels={'overall': 'Average Overall Rating', 'short_name': 'Player Name'}
+    palette='Blues_r'
 )
 
-fig.update_layout(
-    xaxis_title='Average Overall Rating',
-    yaxis_title='Player Name',
-    yaxis=dict(autorange="reversed"),
-    coloraxis_colorbar_title='Average Rating'
-)
+# Customizing the plot
+plt.title('Top Players by Average Overall Rating', fontsize=16)
+plt.xlabel('Average Overall Rating', fontsize=12)
+plt.ylabel('Player Name', fontsize=12)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+plt.tight_layout()
 
-fig.show()
+# Show plot
+plt.show()
+
 ```
-![png](plots/TopPlayersbyAverageOverallRating.png)
+
+
+    
+![png](plots/output_25_0.png)
+    
 
 
 ### Plot "Top Players by Average Overall Rating Over the Years"
@@ -693,8 +679,11 @@ fig.show()
 
 ```python
 import pandas as pd
-import plotly.express as px
+import seaborn as sns
+import matplotlib.pyplot as plt
+import warnings
 
+# Data Preparation
 df = df_mplayers_overall_years.copy()
 
 df_overall_years = (
@@ -714,22 +703,35 @@ df_overall = (
 df_top_overall = df_overall.sort_values('avg_overall', ascending=False).head(5)
 df_top_overall_years = df_overall_years[df_overall_years['short_name'].isin(df_top_overall['short_name'])]
 
-warnings.filterwarnings(action='ignore')
-fig = px.line(
-    data_frame=df_top_overall_years,
+# Plotting with Seaborn
+plt.figure(figsize=(10, 6))
+
+# Plotting average overall rating for each top player over the years
+sns.lineplot(
+    data=df_top_overall_years,
     x='Year',
     y='avg_overall',
-    color='short_name',
-    markers=True,
-    title='Top Players by Average Overall Rating Over the Years',
-    labels={'Year': 'Year', 'avg_overall': 'Overall Rating'},
+    hue='short_name',
+    marker='o'
 )
-warnings.filterwarnings(action='ignore')
-fig.update_layout(legend_title_text='Player Names')
-fig.show()
+
+# Customizing the plot
+plt.title('Top Players by Average Overall Rating Over the Years', fontsize=16)
+plt.xlabel('Year', fontsize=12)
+plt.ylabel('Overall Rating', fontsize=12)
+plt.legend(title='Player Names', fontsize=10)
+plt.tight_layout()
+
+# Show plot
+plt.show()
+
 ```
 
-![png](plots/TopPlayersbyAverageOverallRatingOvertheYears.png)
+
+    
+![png](plots/output_27_0.png)
+    
+
 
 
 ```python
@@ -764,10 +766,11 @@ df_mplayers_overall_years['club_position_group'] = df_mplayers_overall_years['cl
 
 ```python
 import pandas as pd
-import plotly.graph_objects as go
+import seaborn as sns
+import matplotlib.pyplot as plt
 import warnings
 
-
+# Data Preparation
 df = df_mplayers_overall_years.copy()
 
 df_overall_years = (
@@ -789,88 +792,76 @@ df_top_overall_years = df_overall_years[df_overall_years['short_name'].isin(df_t
 
 warnings.filterwarnings(action='ignore')
 
-# Loop through each top player and create a separate figure
+# Plotting with Seaborn
 for player in df_top_overall.index:
     player_data = df_top_overall_years[df_top_overall_years['short_name'] == player]
     
     # Overall ratings data for the player
     overall_data = df_overall[df_overall['short_name'] == player]
     
-    fig = go.Figure()
+    plt.figure(figsize=(10, 6))
     
-    fig.add_trace(
-        go.Scatter(
-            x=overall_data['Year'],
-            y=overall_data['avg_overall'],
-            mode='lines+markers',
-            line=dict(width=2, color='black'),
-            marker=dict(size=6),
-            name='Overall Rating'
-        )
+    # Plot overall ratings
+    sns.lineplot(
+        data=overall_data,
+        x='Year',
+        y='avg_overall',
+        marker='o',
+        label='Overall Rating',
+        color='black'
     )
     
+    # Plot data for each club position group
     for group in player_data['club_position_group'].unique():
         group_data = player_data[player_data['club_position_group'] == group]
-        
-        fig.add_trace(
-            go.Scatter(
-                x=group_data['Year'],
-                y=group_data['avg_overall'],
-                mode='lines+markers',
-                line=dict(width=2),
-                marker=dict(size=6),
-                name=group
-            )
+        sns.lineplot(
+            data=group_data,
+            x='Year',
+            y='avg_overall',
+            marker='o',
+            label=group
         )
     
-
-    fig.update_layout(
-        title=f'{player} - Average Overall Rating Over the Years',
-        xaxis_title='Year',
-        yaxis_title='Average Overall Rating',
-        legend_title='Legend',
-        height=600,
-        width=800
-    )
+    # Customizing the plot
+    plt.title(f'{player} - Average Overall Rating Over the Years', fontsize=14)
+    plt.xlabel('Year', fontsize=12)
+    plt.ylabel('Average Overall Rating', fontsize=12)
+    plt.legend(title='Legend', fontsize=10)
+    plt.tight_layout()
     
-    fig.show()
+    # Show plot
+    plt.show()
 
 ```
 
 
     
-![png](plots/AverageOverallRatingOvertheYears-LMessi.png)
+![png](plots/output_30_0.png)
     
 
 
 
     
-![png](plots/AverageOverallRatingOvertheYears-CristiaboRonaldo.png)
+![png](plots/output_30_1.png)
     
 
 
 
     
-![png](plots/AverageOverallRatingOvertheYears-RLewandowski.png)
+![png](plots/output_30_2.png)
     
 
 
 
     
-![png](plots/AverageOverallRatingOvertheYears-Neymar.png)
+![png](plots/output_30_3.png)
     
 
 
 
     
-![png](plots/AverageOverallRatingOvertheYears-KDeBruyne.png)
+![png](plots/output_30_4.png)
     
-
-
-
-
-
-
 
 
 #### Plot 'Top Players by Value Rating'
@@ -878,36 +869,49 @@ for player in df_top_overall.index:
 
 ```python
 import pandas as pd
-import plotly.express as px
+import seaborn as sns
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 
+# Data Preparation
 df = df_mplayers_overall_years.copy()
 
 df = df.groupby('short_name')['value_eur'].sum().reset_index()
 df = df.sort_values(by='value_eur', ascending=False).head(5)
 
-fig = px.bar(
-    data_frame=df,
+# Plotting with Seaborn
+plt.figure(figsize=(10, 6))
+
+# Bar plot
+sns.barplot(
+    data=df,
     x='value_eur',
     y='short_name',
-    orientation='h',
-    color='value_eur',
-    color_continuous_scale='Blues',
-    title='Top Players by Value Rating',
-    labels={'value_eur': 'Total Value Rating', 'short_name': 'Player Name'}
+    palette='Blues_r'
 )
 
-fig.update_layout(
-    xaxis_title='Sum Value Rating',
-    yaxis_title='Player Name',
-    yaxis=dict(autorange="reversed"),
-    coloraxis_colorbar_title='Sum Rating'
-)
+# Customizing the plot
+plt.title('Top Players by Value Rating', fontsize=16)
+plt.xlabel('Total Value Rating', fontsize=12)
+plt.ylabel('Player Name', fontsize=12)
 
-# Show the plot
-fig.show()
+# Format x-axis to show billions with 'B'
+formatter = FuncFormatter(lambda x, _: f'{x*1e-9:.1f}B')  # Convert to billions (B)
+plt.gca().xaxis.set_major_formatter(formatter)
+
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+plt.tight_layout()
+
+# Show plot
+plt.show()
+
 ```
 
-![png](plots/TopPlayersbyValueRating.png)
+
+    
+![png](plots/output_32_0.png)
+    
 
 
 #### Plot "Top Players by Sum Value Rating Over the Years"
@@ -915,8 +919,11 @@ fig.show()
 
 ```python
 import pandas as pd
-import plotly.express as px
+import seaborn as sns
+import matplotlib.pyplot as plt
+import warnings
 
+# Data Preparation
 df = df_mplayers_overall_years.copy()
 
 df_value_years = (
@@ -925,7 +932,6 @@ df_value_years = (
     .round(2)
     .reset_index(name='sum_value_eur')
 )
-
 
 df_value = (
     df.groupby('short_name')['value_eur']
@@ -937,19 +943,34 @@ df_value = (
 df_top_value = df_value.sort_values('sum_value_eur', ascending=False).head(5)
 df_top_value_years = df_value_years[df_value_years['short_name'].isin(df_top_value['short_name'])]
 
-warnings.filterwarnings(action='ignore')
-fig = px.line(
-    data_frame=df_top_value_years,
+# Plotting with Seaborn
+plt.figure(figsize=(10, 6))
+
+# Plotting value rating for each top player over the years
+sns.lineplot(
+    data=df_top_value_years,
     x='Year',
     y='sum_value_eur',
-    color='short_name',
-    markers=True,
-    title='Top Players by Sum Value Rating Over the Years',
-    labels={'Year': 'Year', 'sum_value_eur': 'Value Rating'},
+    hue='short_name',
+    marker='o'
 )
-warnings.filterwarnings(action='ignore')
-fig.update_layout(legend_title_text='Player Names')
-fig.show()
+
+# Customizing the plot
+plt.title('Top Players by Value Rating Over the Years', fontsize=16)
+plt.xlabel('Year', fontsize=12)
+plt.ylabel('Value Rating', fontsize=12)
+plt.legend(title='Player Names', fontsize=10)
+plt.tight_layout()
+
+# Show plot
+plt.show()
 ```
 
-![png](plots/TopPlayersbyValueRatingOvertheYears.png)
+
+    
+![png](plots/output_34_0.png)
+    
+
+## Dasboard PowerBI
+
+![png](plots/ScreenshotDasboardPBI.png)
